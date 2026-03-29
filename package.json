@@ -4,6 +4,7 @@
   "description": "Birke — your personal AI agent with persistent memory",
   "main": "server.js",
   "scripts": {
+    "build": "echo 'No build step required'",
     "start": "node server.js"
   },
   "dependencies": {
