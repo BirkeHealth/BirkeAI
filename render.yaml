@@ -1,0 +1,20 @@
+databases:
+  - name: birke-db
+    databaseName: birke
+    user: birke
+    plan: free
+
+services:
+  - type: web
+    name: birke
+    plan: free
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: birke-db
+          property: connectionString
+      - key: ANTHROPIC_API_KEY
+        sync: false

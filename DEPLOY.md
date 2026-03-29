@@ -7,6 +7,25 @@
 
 ---
 
+## Quick Deploy (recommended) — using the Blueprint
+
+This repo includes a `render.yaml` Blueprint that sets up the database and web service automatically.
+
+1. Push this repo to GitHub if you haven't already.
+2. Go to render.com → click **New +** → **Blueprint**.
+3. Connect your GitHub account and select this repository.
+4. Render will detect `render.yaml` and show a preview: a PostgreSQL database + a web service.
+5. Click **Apply** — Render creates both resources and automatically links `DATABASE_URL`.
+6. On the web service's **Environment** page, add:
+   - Key: `ANTHROPIC_API_KEY` → Value: your Anthropic API key
+7. Trigger a redeploy — you're live!
+
+> `DATABASE_URL` is wired automatically by the Blueprint; you do **not** need to copy/paste it manually.
+
+---
+
+## Manual Deploy (step-by-step)
+
 ## Step 1 — Create the GitHub repo
 
 1. Go to github.com → click the **+** → **New repository**
