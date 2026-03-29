@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — Birke</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07070f;
+      --surface: #0f0f1a;
+      --surface2: #16162a;
+      --primary: #7c3aed;
+      --primary-light: #9f67ff;
+      --accent: #6366f1;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: #2a2a40;
+      --error: #f87171;
+      --success: #4ade80;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(124,58,237,0.15) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 80% 90%, rgba(99,102,241,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .logo-link {
+      display: block;
+      text-align: center;
+      margin-bottom: 2rem;
+      text-decoration: none;
+      font-size: 1.8rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+      position: relative;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.25rem;
+      position: relative;
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.3px;
+    }
+
+    .card-sub {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Tab toggle */
+    .tab-row {
+      display: flex;
+      background: var(--surface2);
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 1.75rem;
+      gap: 4px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 0.55rem;
+      border: none;
+      border-radius: 7px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    /* Form */
+    .form-group { margin-bottom: 1.1rem; }
+
+    label {
+      display: block;
+      font-size: 0.83rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: var(--primary); }
+    input::placeholder { color: var(--text-muted); opacity: 0.6; }
+
+    .input-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+    }
+
+    .submit-btn {
+      width: 100%;
+      padding: 0.85rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .spinner-sm {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .alert-error {
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      color: var(--error);
+    }
+
+    .alert-success {
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.25);
+      color: var(--success);
+    }
+
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+    .back-link:hover { color: var(--text); }
+
+    @media (max-width: 480px) {
+      .card { padding: 1.5rem; border-radius: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <a href="/" class="logo-link">Birke</a>
+
+  <div class="card">
+    <div class="card-title" id="cardTitle">Welcome back</div>
+    <div class="card-sub" id="cardSub">Sign in to continue with your personal AI</div>
+
+    <div class="tab-row">
+      <button class="tab-btn active" id="loginTab" onclick="setMode('login')">Sign In</button>
+      <button class="tab-btn" id="registerTab" onclick="setMode('register')">Create Account</button>
+    </div>
+
+    <form id="authForm" onsubmit="handleSubmit(event)">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="your username" autocomplete="username" required />
+        <div class="input-hint" id="usernameHint" style="display:none">At least 3 characters</div>
+      </div>
+
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="current-password" required />
+        <div class="input-hint" id="passwordHint" style="display:none">At least 6 characters</div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <div class="spinner-sm" id="submitSpinner"></div>
+        <span id="submitLabel">Sign In</span>
+      </button>
+
+      <div class="alert alert-error" id="errorMsg"></div>
+      <div class="alert alert-success" id="successMsg"></div>
+    </form>
+  </div>
+
+  <a href="/" class="back-link">← Back to home</a>
+
+  <script>
+    let mode = 'login';
+
+    function setMode(m) {
+      mode = m;
+      const isLogin = m === 'login';
+      document.getElementById('loginTab').classList.toggle('active', isLogin);
+      document.getElementById('registerTab').classList.toggle('active', !isLogin);
+      document.getElementById('cardTitle').textContent = isLogin ? 'Welcome back' : 'Create your account';
+      document.getElementById('cardSub').textContent = isLogin
+        ? 'Sign in to continue with your personal AI'
+        : 'Start building your personal AI relationship';
+      document.getElementById('submitLabel').textContent = isLogin ? 'Sign In' : 'Create Account';
+      document.getElementById('usernameHint').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('passwordHint').style.display = isLogin ? 'none' : 'block';
+      document.getElementById('password').autocomplete = isLogin ? 'current-password' : 'new-password';
+      clearAlerts();
+    }
+
+    function clearAlerts() {
+      document.getElementById('errorMsg').style.display = 'none';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('successMsg').style.display = 'none';
+    }
+
+    function showSuccess(msg) {
+      const el = document.getElementById('successMsg');
+      el.textContent = msg;
+      el.style.display = 'block';
+      document.getElementById('errorMsg').style.display = 'none';
+    }
+
+    function setLoading(on) {
+      const btn = document.getElementById('submitBtn');
+      const spinner = document.getElementById('submitSpinner');
+      btn.disabled = on;
+      spinner.style.display = on ? 'block' : 'none';
+    }
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      clearAlerts();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      if (!username || !password) { showError('Please fill in all fields.'); return; }
+
+      setLoading(true);
+      try {
+        const endpoint = mode === 'login' ? '/api/auth/login' : '/api/auth/register';
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showError(data.error || 'Something went wrong. Please try again.');
+          return;
+        }
+
+        localStorage.setItem('birke_token', data.token);
+        localStorage.setItem('birke_user', data.username);
+        showSuccess(mode === 'login' ? 'Signing you in…' : 'Account created! Signing you in…');
+        setTimeout(() => { window.location.href = '/chat'; }, 800);
+      } catch (err) {
+        showError('Connection error. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Redirect if already logged in
+    if (localStorage.getItem('birke_token')) {
+      window.location.href = '/chat';
+    }
+  </script>
+</body>
+</html>
