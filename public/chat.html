@@ -22,7 +22,6 @@
       --success: #4ade80;
       --msg-user-bg: rgba(124, 58, 237, 0.2);
       --msg-ai-bg: var(--surface2);
-      --sports-tag: #0ea5e9;
     }
 
     html, body { height: 100%; overflow: hidden; }
@@ -347,66 +346,6 @@
       font-style: italic;
     }
 
-    /* Sports in sidebar */
-    .news-sport-tabs {
-      display: flex;
-      gap: 4px;
-      margin-bottom: 0.85rem;
-      flex-wrap: wrap;
-    }
-
-    .news-sport-tab {
-      padding: 0.25rem 0.6rem;
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 0.73rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .news-sport-tab.active { background: var(--sports-tag); border-color: var(--sports-tag); color: #fff; }
-    .news-sport-tab:not(.active):hover { border-color: var(--sports-tag); color: var(--text); }
-
-    .news-mini { display: flex; flex-direction: column; gap: 0.6rem; }
-
-    .news-mini-item {
-      display: block;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 0.65rem 0.8rem;
-      text-decoration: none;
-      color: inherit;
-      transition: border-color 0.15s;
-    }
-
-    .news-mini-item:hover { border-color: var(--sports-tag); }
-
-    .news-mini-headline {
-      font-size: 0.8rem;
-      font-weight: 600;
-      line-height: 1.4;
-      color: var(--text);
-      margin-bottom: 0.25rem;
-    }
-
-    .news-mini-time { font-size: 0.7rem; color: var(--text-muted); }
-
-    .news-mini-empty { font-size: 0.8rem; color: var(--text-muted); font-style: italic; }
-
-    .spinner-sm {
-      width: 16px; height: 16px;
-      border: 2px solid var(--border);
-      border-top-color: var(--sports-tag);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-      display: inline-block;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
     /* Mobile: hide sidebar, show toggle */
     @media (max-width: 768px) {
       .sidebar { display: none; }
@@ -435,14 +374,8 @@
   <header>
     <div class="header-logo">Birke</div>
 
-    <div class="header-user">
-      <div class="avatar" id="userAvatar">B</div>
-      <span id="userName">…</span>
-    </div>
-
     <div class="header-actions">
       <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">☰ Info</button>
-      <button class="btn-ghost" onclick="logout()">Sign Out</button>
     </div>
   </header>
 
@@ -484,51 +417,31 @@
         </div>
       </div>
 
-      <!-- Sports News -->
-      <div class="sidebar-section">
-        <div class="sidebar-title">🏆 Sports News</div>
-        <div class="news-sport-tabs" id="sportTabs">
-          <button class="news-sport-tab active" data-sport="nfl" onclick="switchSport(this,'nfl')">NFL</button>
-          <button class="news-sport-tab" data-sport="nba" onclick="switchSport(this,'nba')">NBA</button>
-          <button class="news-sport-tab" data-sport="mlb" onclick="switchSport(this,'mlb')">MLB</button>
-          <button class="news-sport-tab" data-sport="nhl" onclick="switchSport(this,'nhl')">NHL</button>
-        </div>
-        <div class="news-mini" id="sportsNews">
-          <span class="spinner-sm"></span>
-        </div>
-      </div>
-
     </div>
   </div>
 
   <script>
-    const token = localStorage.getItem('birke_token');
-    const username = localStorage.getItem('birke_user') || 'User';
-
-    if (!token) {
-      window.location.href = '/login';
+    function getSessionId() {
+      let id = localStorage.getItem('birke_session');
+      if (!id || !/^[a-f0-9]{32}$/.test(id)) {
+        if (window.crypto && window.crypto.getRandomValues) {
+          id = Array.from(crypto.getRandomValues(new Uint8Array(16)))
+            .map(b => b.toString(16).padStart(2, '0')).join('');
+        } else {
+          id = Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+        }
+        localStorage.setItem('birke_session', id);
+      }
+      return id;
     }
-
-    // Set user info
-    document.getElementById('userName').textContent = username;
-    document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+    const sessionId = getSessionId();
 
     let isWaiting = false;
-    let currentSport = 'nfl';
 
     function escHtml(s) {
       return String(s)
         .replace(/&/g,'&amp;').replace(/</g,'&lt;')
         .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    function timeAgo(dateStr) {
-      if (!dateStr) return '';
-      const diff = Math.round((Date.now() - new Date(dateStr)) / 60000);
-      if (diff < 1) return 'Just now';
-      if (diff < 60) return `${diff}m ago`;
-      if (diff < 1440) return `${Math.round(diff/60)}h ago`;
-      return `${Math.round(diff/1440)}d ago`;
     }
 
     // Auto-resize textarea
@@ -548,7 +461,7 @@
       const msgs = document.getElementById('messages');
       const div = document.createElement('div');
       div.className = `msg ${role}`;
-      const avatarText = role === 'ai' ? 'B' : username.charAt(0).toUpperCase();
+      const avatarText = role === 'ai' ? 'B' : '👤';
       div.innerHTML = `
         <div class="msg-avatar ${role}">${avatarText}</div>
         <div class="msg-bubble">${escHtml(text).replace(/\n/g,'<br>')}</div>`;
@@ -591,19 +504,12 @@
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            'X-Session-Id': sessionId
           },
           body: JSON.stringify({ message: text })
         });
 
         hideTyping();
-
-        if (res.status === 401) {
-          localStorage.removeItem('birke_token');
-          localStorage.removeItem('birke_user');
-          window.location.href = '/login';
-          return;
-        }
 
         const data = await res.json();
         if (!res.ok) {
@@ -662,11 +568,10 @@
     async function loadInitialState() {
       try {
         const res = await fetch('/api/state', {
-          headers: { 'Authorization': `Bearer ${token}` }
+          headers: { 'X-Session-Id': sessionId }
         });
-        if (res.status === 401) {
-          localStorage.removeItem('birke_token');
-          window.location.href = '/login';
+        if (!res.ok) {
+          document.getElementById('traitList').innerHTML = '<div class="no-data">Could not load state.</div>';
           return;
         }
         const data = await res.json();
@@ -676,50 +581,15 @@
       }
     }
 
-    // Sports news in sidebar
-    async function loadSportsNews(sport) {
-      const container = document.getElementById('sportsNews');
-      container.innerHTML = '<span class="spinner-sm"></span>';
-      try {
-        const res = await fetch(`/api/sports-news?sport=${sport}`);
-        const data = await res.json();
-        if (!res.ok || !data.articles || !data.articles.length) {
-          container.innerHTML = '<div class="news-mini-empty">News unavailable.</div>';
-          return;
-        }
-        container.innerHTML = data.articles.slice(0, 4).map(a => `
-          <a class="news-mini-item" href="${escHtml(a.link)}" target="_blank" rel="noopener">
-            <div class="news-mini-headline">${escHtml(a.headline)}</div>
-            <div class="news-mini-time">${timeAgo(a.published)}</div>
-          </a>`).join('');
-      } catch (e) {
-        container.innerHTML = '<div class="news-mini-empty">Could not load news.</div>';
-      }
-    }
-
-    function switchSport(btn, sport) {
-      document.querySelector('.news-sport-tab.active').classList.remove('active');
-      btn.classList.add('active');
-      currentSport = sport;
-      loadSportsNews(sport);
-    }
-
     function toggleSidebar() {
       document.getElementById('sidebar').classList.toggle('show');
     }
 
-    function logout() {
-      localStorage.removeItem('birke_token');
-      localStorage.removeItem('birke_user');
-      window.location.href = '/';
-    }
-
     // Welcome message
-    appendMsg('ai', `Hey ${username}! I'm Birke — your personal AI. I remember everything you share with me and grow with you over time. What's on your mind? 😊`);
+    appendMsg('ai', `Hey! I'm Birke — your personal AI. I remember everything you share with me and grow with you over time. What's on your mind? 😊`);
 
     // Load data
     loadInitialState();
-    loadSportsNews(currentSport);
   </script>
 </body>
 </html>
