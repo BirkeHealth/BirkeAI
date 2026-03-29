@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birke — Your Personal AI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #07070f;
+      --surface: #0f0f1a;
+      --surface2: #16162a;
+      --primary: #7c3aed;
+      --primary-light: #9f67ff;
+      --accent: #6366f1;
+      --text: #e2e8f0;
+      --text-muted: #94a3b8;
+      --border: #2a2a40;
+      --error: #f87171;
+      --success: #4ade80;
+      --sports-tag: #0ea5e9;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(7, 7, 15, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: -0.5px;
+    }
+
+    .nav-links { display: flex; align-items: center; gap: 1rem; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.55rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .btn-outline {
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--border);
+    }
+    .btn-outline:hover { color: var(--text); border-color: var(--primary); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(124, 58, 237, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+    }
+
+    .btn-large { padding: 0.85rem 2rem; font-size: 1rem; border-radius: 10px; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 7rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 70% 50% at 50% 0%, rgba(124,58,237,0.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(99,102,241,0.12) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .hero-content { position: relative; max-width: 780px; }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 1rem;
+      border-radius: 99px;
+      background: rgba(124, 58, 237, 0.15);
+      border: 1px solid rgba(124, 58, 237, 0.35);
+      color: var(--primary-light);
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      letter-spacing: -1.5px;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--primary-light) 0%, #c084fc 50%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      max-width: 540px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .hero-scroll {
+      margin-top: 4rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(6px); }
+    }
+
+    /* ── FEATURES ── */
+    .section {
+      padding: 5rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-tag {
+      display: inline-block;
+      padding: 0.3rem 0.9rem;
+      border-radius: 99px;
+      background: rgba(124, 58, 237, 0.12);
+      color: var(--primary-light);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1rem;
+    }
+
+    .section-header h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .section-header p {
+      color: var(--text-muted);
+      margin-top: 0.75rem;
+      font-size: 1.05rem;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      transition: all 0.25s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(124,58,237,0.06), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .feature-card:hover { transform: translateY(-4px); border-color: rgba(124,58,237,0.4); }
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(124, 58, 237, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .feature-card p { color: var(--text-muted); font-size: 0.9rem; }
+
+    /* ── SPORTS NEWS ── */
+    .sports-section { padding: 5rem 2rem; background: var(--surface); }
+
+    .sports-inner { max-width: 1100px; margin: 0 auto; }
+
+    .sports-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .sport-tab {
+      padding: 0.45rem 1.1rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sport-tab:hover { border-color: var(--primary); color: var(--text); }
+    .sport-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    .news-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .news-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: all 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .news-card:hover { transform: translateY(-3px); border-color: rgba(124,58,237,0.4); }
+
+    .news-img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      background: var(--surface2);
+    }
+
+    .news-img-placeholder {
+      width: 100%;
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--surface2), #1a1a30);
+      font-size: 2.5rem;
+    }
+
+    .news-body { padding: 1rem; flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .news-sport-tag {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      background: rgba(14, 165, 233, 0.15);
+      color: var(--sports-tag);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .news-headline { font-size: 0.95rem; font-weight: 700; line-height: 1.4; flex: 1; }
+    .news-desc { color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; }
+
+    .news-time {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      margin-top: auto;
+    }
+
+    .news-loading {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-muted);
+    }
+
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto 1rem;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── CTA ── */
+    .cta-section {
+      text-align: center;
+      padding: 6rem 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 60% at 50% 50%, rgba(124,58,237,0.12) 0%, transparent 70%);
+    }
+
+    .cta-section h2 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 1rem;
+    }
+
+    .cta-section p { color: var(--text-muted); margin-bottom: 2rem; font-size: 1.05rem; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    footer span {
+      background: linear-gradient(135deg, var(--primary-light), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+    }
+
+    @media (max-width: 600px) {
+      nav { padding: 0.8rem 1rem; }
+      .hero { padding: 6rem 1rem 3rem; }
+      .section { padding: 3rem 1rem; }
+      .sports-section { padding: 3rem 1rem; }
+      .news-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-logo">Birke</div>
+    <div class="nav-links">
+      <a href="#sports" class="btn btn-outline">Sports News</a>
+      <a href="/login" class="btn btn-primary">Sign In</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-badge">✦ Powered by Claude AI</div>
+      <h1>Your AI that truly<br /><span>remembers you</span></h1>
+      <p class="hero-sub">
+        Birke is a personal AI agent that builds a real personality through every conversation —
+        learning who you are, what you love, and growing closer to you over time.
+      </p>
+      <div class="hero-actions">
+        <a href="/login" class="btn btn-primary btn-large">Get Started Free</a>
+        <a href="#features" class="btn btn-outline btn-large">Learn More</a>
+      </div>
+      <div class="hero-scroll">
+        <span>Scroll to explore</span>
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <path d="M8 3v10M3 9l5 5 5-5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section id="features" class="section">
+    <div class="section-header">
+      <div class="section-tag">Features</div>
+      <h2>Built to know you</h2>
+      <p>Every message makes Birke smarter about who you are</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🧠</div>
+        <h3>Persistent Memory</h3>
+        <p>Birke remembers everything you share — across sessions, devices, and time.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✨</div>
+        <h3>Evolving Personality</h3>
+        <p>Five core traits — curious, warm, witty, direct, thoughtful — grow through every conversation.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Private & Secure</h3>
+        <p>Your memories and conversations are stored privately in your personal account.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>Real-time Chat</h3>
+        <p>Instant responses powered by Claude's latest model for natural, human-like conversation.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏆</div>
+        <h3>Sports News</h3>
+        <p>Stay up to date with live sports headlines from NFL, NBA, MLB, and NHL right inside the app.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌐</div>
+        <h3>Cross-Device Sync</h3>
+        <p>Pick up any conversation from any device — your AI grows with you everywhere.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- SPORTS NEWS -->
+  <section id="sports" class="sports-section">
+    <div class="sports-inner">
+      <div class="section-header">
+        <div class="section-tag" style="background:rgba(14,165,233,0.12);color:var(--sports-tag)">Sports</div>
+        <h2>Latest Sports News</h2>
+        <p>Live headlines from your favorite leagues</p>
+      </div>
+
+      <div class="sports-tabs">
+        <button class="sport-tab active" data-sport="nfl">🏈 NFL</button>
+        <button class="sport-tab" data-sport="nba">🏀 NBA</button>
+        <button class="sport-tab" data-sport="mlb">⚾ MLB</button>
+        <button class="sport-tab" data-sport="nhl">🏒 NHL</button>
+      </div>
+
+      <div class="news-grid" id="newsGrid">
+        <div class="news-loading">
+          <div class="spinner"></div>
+          Loading sports news…
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-section">
+    <div style="position:relative">
+      <h2>Ready to meet your AI?</h2>
+      <p>Join Birke and start building a connection that grows every day.</p>
+      <a href="/login" class="btn btn-primary btn-large">Create your account</a>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>© 2025 <span>Birke</span> · Your personal AI with persistent memory</p>
+  </footer>
+
+  <script>
+    const SPORT_LABELS = { nfl: 'NFL', nba: 'NBA', mlb: 'MLB', nhl: 'NHL' };
+    const SPORT_ICONS  = { nfl: '🏈', nba: '🏀', mlb: '⚾', nhl: '🏒' };
+    let currentSport = 'nfl';
+
+    function timeAgo(dateStr) {
+      if (!dateStr) return '';
+      const diff = Math.round((Date.now() - new Date(dateStr)) / 60000);
+      if (diff < 1) return 'Just now';
+      if (diff < 60) return `${diff}m ago`;
+      if (diff < 1440) return `${Math.round(diff / 60)}h ago`;
+      return `${Math.round(diff / 1440)}d ago`;
+    }
+
+    async function loadNews(sport) {
+      const grid = document.getElementById('newsGrid');
+      grid.innerHTML = `<div class="news-loading"><div class="spinner"></div>Loading ${SPORT_LABELS[sport]} news…</div>`;
+      try {
+        const res = await fetch(`/api/sports-news?sport=${sport}`);
+        const data = await res.json();
+        if (!res.ok || !data.articles || !data.articles.length) {
+          grid.innerHTML = `<div class="news-loading" style="color:var(--error)">⚠ Sports news temporarily unavailable.</div>`;
+          return;
+        }
+        grid.innerHTML = data.articles.map(a => `
+          <a class="news-card" href="${a.link}" target="_blank" rel="noopener">
+            ${a.image
+              ? `<img class="news-img" src="${a.image}" alt="" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+              : ''}
+            <div class="news-img-placeholder" ${a.image ? 'style="display:none"' : ''}>${SPORT_ICONS[sport]}</div>
+            <div class="news-body">
+              <span class="news-sport-tag">${SPORT_LABELS[sport]}</span>
+              <div class="news-headline">${escHtml(a.headline)}</div>
+              ${a.description ? `<div class="news-desc">${escHtml(a.description.slice(0, 110))}${a.description.length > 110 ? '…' : ''}</div>` : ''}
+              <div class="news-time">${timeAgo(a.published)}</div>
+            </div>
+          </a>`).join('');
+      } catch (e) {
+        grid.innerHTML = `<div class="news-loading" style="color:var(--error)">⚠ Could not load sports news.</div>`;
+      }
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    document.querySelectorAll('.sport-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelector('.sport-tab.active').classList.remove('active');
+        tab.classList.add('active');
+        currentSport = tab.dataset.sport;
+        loadNews(currentSport);
+      });
+    });
+
+    loadNews(currentSport);
+  </script>
+</body>
+</html>
